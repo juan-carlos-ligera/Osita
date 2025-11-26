@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Geschützte Seite</title>
+    <style>
+        #content {
+            display: none; /* Inhalt ist anfangs versteckt */
+        }
+
+        #loginBox {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Geschützte Seite</h1>
+
+<div id="loginBox">
+    <p>Bitte Code eingeben:</p>
+    <input type="password" id="passwortEingabe">
+    <button onclick="checkPassword()">Weiter</button>
+    <p id="meldung" style="color:red;"></p>
+</div>
+
+<div id="content">
+    <h2>No ves todavia</h2>
+    <p>Dieser Text erscheint nur, wenn das Passwort stimmt.</p>
+</div>
+
+<script>
+    // 👉 HIER steht dein Passwort
+    const korrektesPasswort = "Kuchen";
+
+    function checkPassword() {
+        const eingabe = document.getElementById("passwortEingabe").value;
+
+        if (eingabe === korrektesPasswort) {
+            document.getElementById("content").style.display = "block";
+            document.getElementById("loginBox").style.display = "none";
+        } else {
+            document.getElementById("meldung").innerText = "Falsches Passwort!";
+        }
+    }
+</script>
+
+</body>
+</html>
