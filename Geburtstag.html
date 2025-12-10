@@ -2,36 +2,106 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Geschützte Seite</title>
+    <title>Acceso restringido</title>
+
     <style>
-        #content {
-            display: none; /* Inhalt ist anfangs versteckt */
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b0b0b;
+            color: #c9c9c9;
+            margin: 0;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        h1 {
+            font-size: 38px;
+            color: #AC58FA;
+            letter-spacing: 3px;
+            text-shadow: 0 0 12px #AC58FA;
         }
 
         #loginBox {
-            margin-top: 0 auto;
-            color: red;
+            margin: 0 auto;
+            margin-top: 40px;
+            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #AC58FA;
+            border-radius: 20px;
+            width: 300px;
+            box-shadow: 0 0 20px rgba(172, 88, 250, 0.4);
+            animation: fadeIn 1s ease-out;
+        }
+
+        #loginBox input {
+            width: 80%;
+            padding: 8px 12px;
+            margin-top: 10px;
+            border-radius: 15px;
+            border: 2px solid #AC58FA;
+            background: #0b0b0b;
+            color: #AC58FA;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+        }
+
+        #loginBox button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid #AC58FA;
+            color: #AC58FA;
+            font-size: 16px;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #loginBox button:hover {
+            background: #AC58FA;
+            color: #0b0b0b;
+            box-shadow: 0 0 15px #AC58FA;
+        }
+
+        #content {
+            display: none;
+            animation: fadeIn 1s ease-out;
+            margin-top: 60px;
+        }
+
+        #content h2 {
+            font-size: 32px;
+            color: #E2A9F3;
+            text-shadow: 0 0 12px #E2A9F3;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
+
 <body>
 
-<h1>Geschützte Seite</h1>
+<h1>Acceso restringido</h1>
 
 <div id="loginBox">
-    <p>Bitte Code eingeben:</p>
-    <input type="password" id="passwortEingabe">
-    <button onclick="checkPassword()">Weiter</button>
-    <p id="meldung" style="color:red;"></p>
+    <p>Introduce la clave:</p>
+    <input type="password" id="passwortEingabe" placeholder="●●●●●●">
+    <button onclick="checkPassword()">Entrar</button>
+    <p id="meldung" style="color:#ff4d4d;"></p>
 </div>
 
 <div id="content">
-    <h2>No ves todavia</h2>
-    <p>Dieser Text erscheint nur, wenn das Passwort stimmt.</p>
+    <h2>Aún no deberías verlo…</h2>
+    <p>Pero como has encontrado la clave, bienvenido.</p>
 </div>
 
+ <Button>R EgaJo </Button>
 <script>
-    // 👉 HIER steht dein Passwort
+    // Passwort versteckt im Code
     const korrektesPasswort = "Kuchen";
 
     function checkPassword() {
@@ -41,7 +111,7 @@
             document.getElementById("content").style.display = "block";
             document.getElementById("loginBox").style.display = "none";
         } else {
-            document.getElementById("meldung").innerText = "Falsches Passwort!";
+            document.getElementById("meldung").innerText = "Clave incorrecta…";
         }
     }
 </script>
