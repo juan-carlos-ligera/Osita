@@ -175,14 +175,15 @@ let step = 0;
 let perfectRun = true;
 
 const moments = [
- {question:"¿Cómo estamos hoy mi niñita?",type:"text",answer:"muy bien",image:"19.png"},
- {question:"¿En qué país eres legalmente adulto solo a partir de hoy?",type:"choice",options:["Nueva Zelanda","Sudáfrica","Corea del Sur"],answer:"Nueva Zelanda",image:"abogada.jpeg"},
- {question:"¿A partir de cuántos minutos aparece la saciedad?",type:"text",answer:"20",image:"abogada.jpg"},
- {question:"¿Cuántos km entre Alemania y Perú?",type:"choice",options:["30.000 km","24.000 km","11.000 km"],answer:"11.000 km",image:"abogada.png"},
+ {question:"¿Cómo estamos hoy mi niñita?",type:"text",answer:"muy bien",image:"LINK1"},
+ {question:"¿En qué país eres legalmente adulto solo a partir de hoy?",type:"choice",options:["Nueva Zelanda","Sudáfrica","Corea del Sur"],answer:"Nueva Zelanda",image:"LINK2"},
+ {question:"¿A partir de cuántos minutos aparece la saciedad?",type:"text",answer:"20",image:"LINK3"},
+ {question:"¿Cuántos km entre Alemania y Perú?",type:"choice",options:["30.000 km","24.000 km","11.000 km"],answer:"11.000 km",image:"LINK4"},
  {question:"¿Quién no tiene que hacerse cargo de los daños por aguas residuales debido a que la inspección de los daños no se realizó correctamente?",type:"text",answer:"ecoplus",image:"LINK5"},
  {question:"¿Qué famoso cumple años el 28 de diciembre?",type:"choice",options:["Beethoven","Jefferson Farfán","John Legend"],answer:"John Legend",image:"LINK6"},
  {question:"¿Quién está orgullosa de sí misma?",type:"text",answer:"yo",image:"LINK7"},
- {question:"Según ley peruana, ¿pena?",type:"choice",options:["<5 años","5-12 años",">12 años"],answer:"<5 años",image:"LINK8"},
+ {question:"El escenario: tres personas sin antecedentes penales entran por la noche sin permiso en una propiedad habitada para ocuparla.
+La comisión del delito: empujan al propietario (uso de la fuerza), pero no utilizan armas ni actúan como una banda organizada.",type:"choice",options:["<5 años","5-12 años",">12 años"],answer:"<5 años",image:"LINK8"},
  {question:"¿Planeta más lejano?",type:"text",answer:"neptuno",image:"LINK9"},
  {question:"¿Dónde cumplen 20 más personas en 2025?",type:"choice",options:["Alemania","Casi igual","Perú"],answer:"Casi igual",image:"LINK10"},
  {question:"¿Grand Slams de Federer?",type:"text",answer:"20",image:"LINK11"},
@@ -251,8 +252,6 @@ function checkAnswer(){
         if(step === 10){
             showVideo("videoAfter10","s0WzVqNqLx8");
         }
- 
-        
         if(step === 20){
             showVideo("videoFinal","r0DH0p9_ql0");
         }
