@@ -1,119 +1,287 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Acceso restringido</title>
+<meta charset="UTF-8">
+<title>Tu año ✨ (20)</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #0b0b0b;
-            color: #c9c9c9;
-            margin: 0;
-            text-align: center;
-            padding-top: 80px;
-        }
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0b0b0b;
+    color: #c9c9c9;
+    text-align: center;
+    padding: 70px 20px;
+}
 
-        h1 {
-            font-size: 38px;
-            color: #AC58FA;
-            letter-spacing: 3px;
-            text-shadow: 0 0 12px #AC58FA;
-        }
+h1, h2 {
+    color: #AC58FA;
+    letter-spacing: 2px;
+    text-shadow: 0 0 12px #AC58FA;
+}
 
-        #loginBox {
-            margin: 0 auto;
-            margin-top: 40px;
-            padding: 20px 30px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid #AC58FA;
-            border-radius: 20px;
-            width: 300px;
-            box-shadow: 0 0 20px rgba(172, 88, 250, 0.4);
-            animation: fadeIn 1s ease-out;
-        }
+.box {
+    margin: 40px auto;
+    padding: 25px;
+    width: 360px;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid #AC58FA;
+    border-radius: 22px;
+    box-shadow: 0 0 20px rgba(172,88,250,0.4);
+}
 
-        #loginBox input {
-            width: 80%;
-            padding: 8px 12px;
-            margin-top: 10px;
-            border-radius: 15px;
-            border: 2px solid #AC58FA;
-            background: #0b0b0b;
-            color: #AC58FA;
-            font-size: 16px;
-            outline: none;
-            text-align: center;
-        }
+input, button {
+    width: 80%;
+    padding: 10px;
+    margin-top: 14px;
+    border-radius: 18px;
+    border: 2px solid #AC58FA;
+    background: #0b0b0b;
+    color: #AC58FA;
+    font-size: 16px;
+    text-align: center;
+}
 
-        #loginBox button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: transparent;
-            border: 2px solid #AC58FA;
-            color: #AC58FA;
-            font-size: 16px;
-            border-radius: 18px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+button {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-        #loginBox button:hover {
-            background: #AC58FA;
-            color: #0b0b0b;
-            box-shadow: 0 0 15px #AC58FA;
-        }
+button:hover {
+    background: #AC58FA;
+    color: #0b0b0b;
+    box-shadow: 0 0 15px #AC58FA;
+}
 
-        #content {
-            display: none;
-            animation: fadeIn 1s ease-out;
-            margin-top: 60px;
-        }
+.hidden { display: none; }
 
-        #content h2 {
-            font-size: 32px;
-            color: #E2A9F3;
-            text-shadow: 0 0 12px #E2A9F3;
-        }
+#horse {
+    font-size: 48px;
+    margin-top: 20px;
+    animation: trot 1s infinite alternate ease-in-out;
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+@keyframes trot {
+    from { transform: translateX(-12px); }
+    to { transform: translateX(12px); }
+}
+
+.choice-btn.selected {
+    background: #AC58FA;
+    color: #0b0b0b;
+    box-shadow: 0 0 15px #AC58FA;
+}
+
+.card {
+    width: 260px;
+    height: 160px;
+    margin: 25px auto;
+    perspective: 1000px;
+}
+
+.inner {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.9s;
+    transform-style: preserve-3d;
+}
+
+.card.show .inner {
+    transform: rotateY(180deg);
+}
+
+.front, .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 18px;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+}
+
+.front {
+    background: rgba(172,88,250,0.15);
+    border: 2px dashed #AC58FA;
+}
+
+.back {
+    background-size: cover;
+    background-position: center;
+    transform: rotateY(180deg);
+    border: 2px solid #AC58FA;
+}
+
+.video-box {
+    width: 320px;
+    height: 180px;
+    margin: 20px auto;
+}
+.video-box iframe {
+    width: 100%;
+    height: 100%;
+}
+</style>
 </head>
 
 <body>
 
 <h1>Acceso restringido</h1>
 
-<div id="loginBox">
+<div class="box" id="loginBox">
     <p>Introduce la clave:</p>
-    <input type="password" id="passwortEingabe" placeholder="●●●●●●">
-    <button onclick="checkPassword()">Entrar</button>
-    <p id="meldung" style="color:#ff4d4d;"></p>
+    <input type="password" id="pw">
+    <div id="horse">🐎</div>
+    <button onclick="login()">Entrar</button>
+    <p id="error" style="color:#ff4d4d;"></p>
 </div>
 
-<div id="content">
-    <h2>Aún no deberías verlo…(Cumple)</h2>
-    <p>Pero como has encontrado la clave, bienvenido.</p>
+<div class="box hidden" id="introBox">
+    <h2>Un año para celebrar 🎂</h2>
+    <p>
+        Es tu <strong>CUMPLEAÑOS</strong>.<br><br>
+        🎁 🍫 · 🌹 · 🤍<br>
+        🏆 Si todo fluye a la primera:<br>
+        🌼 + <em>La Flor</em><br>
+        § Artículo 194 del Código Civil §
+    </p>
+    <div class="video-box">
+        <iframe src="https://www.youtube.com/embed/r0DH0p9_ql0?autoplay=1&mute=1&controls=1"
+                allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+    <button onclick="startGame()">Mi Einsteincita 💜</button>
 </div>
 
- <Button>R EgaJo </Button>
+<div id="game" class="hidden">
+    <h2>El año de mi princecita</h2>
+
+    <div class="box">
+        <p id="question"></p>
+        <div id="answers"></div>
+        <input id="textAnswer" class="hidden">
+        <button onclick="checkAnswer()">Confirmar</button>
+        <p id="msg"></p>
+    </div>
+
+    <div id="videoAfter10" class="video-box hidden"></div>
+    <div id="cards"></div>
+    <div id="videoFinal" class="video-box hidden"></div>
+</div>
+
 <script>
-    // Passwort versteckt im Code
-    const korrektesPasswort = "La mujer de mi sueño dra osita";
+const PASSWORD = "La mujer de mi sueño dra osita";
+let step = 0;
+let perfectRun = true;
 
-    function checkPassword() {
-        const eingabe = document.getElementById("passwortEingabe").value;
+const moments = [
+ {question:"¿Cómo estamos hoy mi niñita?",type:"text",answer:"muy bien",image:"LINK1"},
+ {question:"¿En qué país eres legalmente adulto solo a partir de hoy?",type:"choice",options:["Nueva Zelanda","Sudáfrica","Corea del Sur"],answer:"Nueva Zelanda",image:"LINK2"},
+ {question:"¿A partir de cuántos minutos aparece la saciedad?",type:"text",answer:"20",image:"LINK3"},
+ {question:"¿Cuántos km entre Alemania y Perú?",type:"choice",options:["30.000 km","24.000 km","11.000 km"],answer:"11.000 km",image:"LINK4"},
+ {question:"¿Quién no tiene que hacerse cargo de los daños por aguas residuales debido a que la inspección de los daños no se realizó correctamente?",type:"text",answer:"ecoplus",image:"LINK5"},
+ {question:"¿Qué famoso cumple años el 28 de diciembre?",type:"choice",options:["Beethoven","Jefferson Farfán","John Legend"],answer:"John Legend",image:"LINK6"},
+ {question:"¿Quién está orgullosa de sí misma?",type:"text",answer:"yo",image:"LINK7"},
+ {question:"Según ley peruana, ¿pena?",type:"choice",options:["<5 años","5-12 años",">12 años"],answer:"<5 años",image:"LINK8"},
+ {question:"¿Planeta más lejano?",type:"text",answer:"neptuno",image:"LINK9"},
+ {question:"¿Dónde cumplen 20 más personas en 2025?",type:"choice",options:["Alemania","Casi igual","Perú"],answer:"Casi igual",image:"LINK10"},
+ {question:"¿Grand Slams de Federer?",type:"text",answer:"20",image:"LINK11"},
+ {question:"¿Quién dijo que nadie actúa mal voluntariamente?",type:"choice",options:["Kant","Sócrates","Pietsch"],answer:"Sócrates",image:"LINK12"},
+ {question:"¿Fundación del Imperio Romano?",type:"text",answer:"27 a.c.",image:"LINK13"},
+ {question:"¿Qué pasó en Alemania en 2005?",type:"choice",options:["Angela Merkel","Mundial","Euro"],answer:"Angela Merkel",image:"LINK14"},
+ {question:"¿Huesos del cuerpo humano?",type:"text",answer:"206",image:"LINK15"},
+ {question:"¿Cuántos no saben nadar?",type:"choice",options:["nadie","muchos","no importa"],answer:"no importa",image:"LINK16"},
+ {question:"Desde Gliese 581, ¿años luz?",type:"text",answer:"20",image:"LINK17"},
+ {question:"¿Desde cuándo enseña Nakazaki?",type:"choice",options:["2005","1996","1986"],answer:"1986",image:"LINK18"},
+ {question:"Hoy en un año estaré…",type:"text",answer:"habiendo seguido creciendo",image:"LINK19"},
+ {question:"¿Quién puede decir 'solo soy una chica en sus 20s'?",type:"choice",options:["YO","yO","Yo"],answer:"Yo",image:"LINK20"},
+ {question:"Fue todo mi niñita",type:"choice",options:["Feliz","Cumple","años"],answer:"Yo",image:"LINK20"}
+];
 
-        if (eingabe === korrektesPasswort) {
-            document.getElementById("content").style.display = "block";
-            document.getElementById("loginBox").style.display = "none";
-        } else {
-            document.getElementById("meldung").innerText = "Clave incorrecta…";
-        }
+function login(){
+    if(pw.value === PASSWORD){
+        loginBox.classList.add("hidden");
+        introBox.classList.remove("hidden");
+    } else {
+        error.innerText = "Clave incorrecta…";
     }
+}
+
+function startGame(){
+    introBox.classList.add("hidden");
+    game.classList.remove("hidden");
+    loadQuestion();
+}
+
+function loadQuestion(){
+    if(step >= moments.length){
+        showFinalMessage();
+        return;
+    }
+    const m = moments[step];
+    question.innerText = m.question;
+    msg.innerText = "";
+    answers.innerHTML = "";
+    textAnswer.value = "";
+    textAnswer.classList.add("hidden");
+
+    if(m.type === "choice"){
+        m.options.forEach(opt=>{
+            const b=document.createElement("button");
+            b.innerText=opt;
+            b.classList.add("choice-btn");
+            b.onclick=()=>{
+                document.querySelectorAll(".choice-btn").forEach(x=>x.classList.remove("selected"));
+                b.classList.add("selected");
+                textAnswer.value=opt;
+            };
+            answers.appendChild(b);
+        });
+    } else {
+        textAnswer.classList.remove("hidden");
+    }
+}
+
+function checkAnswer(){
+    const m = moments[step];
+    const user = textAnswer.value.toLowerCase().trim();
+    if(user === m.answer.toLowerCase()){
+        revealCard(m.image, m.question);
+        step++;
+        if(step === 10){
+            showVideo("videoAfter10","s0WzVqNqLx8");
+        }
+        if(step === 20){
+            showVideo("videoFinal","r0DH0p9_ql0");
+        }
+        loadQuestion();
+    } else {
+        msg.innerText="Tómate tu tiempo 💜";
+        perfectRun=false;
+    }
+}
+
+function revealCard(img,title){
+    const card=document.createElement("div");
+    card.className="card show";
+    card.innerHTML=`<div class="inner"><div class="front">${title}</div><div class="back" style="background-image:url('${img}')"></div></div>`;
+    cards.appendChild(card);
+}
+
+function showVideo(id,yt){
+    const c=document.getElementById(id);
+    c.innerHTML=`<iframe src="https://www.youtube.com/embed/${yt}?autoplay=1&mute=1&controls=1" allow="autoplay"></iframe>`;
+    c.classList.remove("hidden");
+}
+
+function showFinalMessage(){
+    const box=document.createElement("div");
+    box.className="box";
+    box.innerHTML = perfectRun
+      ? "<h2>🎂 Feliz cumpleaños</h2><p>Este año habla por ti.</p>"
+      : "<h2>💜 Feliz cumpleaños</h2><p>Cada recuerdo cuenta.</p>";
+    game.appendChild(box);
+}
 </script>
 
 </body>
