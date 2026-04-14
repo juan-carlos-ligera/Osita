@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego - Osita</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background-color: #1a1a2e;
+      color: #f5f5f5;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* --- NAV --- */
+    nav {
+      text-align: center;
+      padding: 18px 10px;
+      background: rgba(0,0,0,0.3);
+    }
+    nav a {
+      color: #f5deb3;
+      text-decoration: none;
+      margin: 0 12px;
+      font-size: 16px;
+      padding: 6px 14px;
+      border-radius: 18px;
+      transition: background 0.3s;
+    }
+    nav a:hover { background: rgba(255,255,255,0.12); }
+
+    /* --- SECTIONS --- */
+    .section {
+      display: none;
+      animation: fadeUp 0.8s ease;
+    }
+    .section.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===================== */
+    /*   PART 1 - MEMORY     */
+    /* ===================== */
+    #memory-section {
+      text-align: center;
+      padding: 30px 15px 60px;
+    }
+    #memory-section h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      margin-bottom: 8px;
+      color: #ffd700;
+    }
+    #memory-section .subtitle {
+      font-size: clamp(14px, 3vw, 18px);
+      color: #ccc;
+      margin-bottom: 24px;
+    }
+    .stats {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #f5deb3;
+    }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      max-width: 480px;
+      margin: 0 auto;
+      perspective: 1000px;
+    }
+
+    .card {
+      aspect-ratio: 1;
+      cursor: pointer;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.5s ease;
+    }
+    .card.flipped { transform: rotateY(180deg); }
+    .card.matched { transform: rotateY(180deg); }
+    .card.matched::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 12px;
+      border: 3px solid #ffd700;
+      box-shadow: 0 0 18px rgba(255,215,0,0.5), inset 0 0 18px rgba(255,215,0,0.15);
+      z-index: 10;
+      animation: glowPulse 1.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 12px rgba(255,215,0,0.4), inset 0 0 12px rgba(255,215,0,0.1); }
+      50%      { box-shadow: 0 0 24px rgba(255,215,0,0.7), inset 0 0 24px rgba(255,215,0,0.25); }
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 10px;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, #2c2c54, #3d3d6b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      border: 2px solid #555;
+      user-select: none;
+    }
+
+    .card-front {
+      transform: rotateY(180deg);
+      background: #222;
+    }
+    .card-front img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* celebration overlay */
+    .celebration {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      animation: fadeUp 0.6s ease;
+    }
+    .celebration.active { display: flex; }
+    .celebration h2 {
+      font-size: clamp(28px, 6vw, 48px);
+      color: #ffd700;
+      margin-bottom: 16px;
+    }
+    .celebration p {
+      font-size: 20px;
+      color: #f5deb3;
+      margin-bottom: 30px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 14px 36px;
+      font-size: 18px;
+      font-family: Georgia, serif;
+      color: #1a1a2e;
+      background: linear-gradient(135deg, #ffd700, #f0c040);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+    }
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 20px rgba(255,215,0,0.4);
+    }
+
+    /* ========================== */
+    /*   PART 2 - SCHATZKARTE     */
+    /* ========================== */
+    #schatzkarte-section {
+      text-align: center;
+      padding: 50px 15px 60px;
+    }
+
+    .bear-container {
+      display: inline-block;
+      position: relative;
+      animation: fadeUp 1s ease;
+    }
+
+    .bear-svg {
+      max-width: 340px;
+      width: 80vw;
+      height: auto;
+      filter: drop-shadow(0 0 20px rgba(255,215,0,0.3));
+    }
+
+    .typewriter {
+      font-size: clamp(18px, 4vw, 26px);
+      color: #f5deb3;
+      margin-top: 30px;
+      min-height: 40px;
+    }
+    .typewriter .cursor {
+      animation: blink 0.7s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .schatzkarte-btn {
+      margin-top: 30px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 2.5s forwards;
+    }
+
+    /* ======================== */
+    /*   PART 3 - WELTKUGEL     */
+    /* ======================== */
+    #weltkugel-section {
+      text-align: center;
+      padding: 40px 15px 80px;
+    }
+    #weltkugel-section h1 {
+      font-size: clamp(26px, 5vw, 40px);
+      color: #ffd700;
+      margin-bottom: 6px;
+    }
+    #weltkugel-section .subtitle {
+      font-size: clamp(14px, 3vw, 18px);
+      color: #ccc;
+      margin-bottom: 36px;
+    }
+
+    .globe-wrapper {
+      position: relative;
+      width: clamp(280px, 70vw, 420px);
+      height: clamp(280px, 70vw, 420px);
+      margin: 0 auto 50px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(255,215,0,0.4);
+      box-shadow: 0 0 40px rgba(100,149,237,0.25), inset 0 0 60px rgba(0,0,0,0.5);
+      background: radial-gradient(circle at 35% 35%, #1e5799, #0b2a5e 60%, #061230);
+    }
+
+    .globe-map {
+      position: absolute;
+      top: 0; left: 0;
+      width: 200%; height: 100%;
+      animation: rotateGlobe 30s linear infinite;
+      opacity: 0.55;
+    }
+    @keyframes rotateGlobe {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    .globe-shine {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.18), transparent 55%);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* City pins */
+    .city-pin {
+      position: absolute;
+      z-index: 10;
+      cursor: pointer;
+    }
+    .pin-dot {
+      width: 14px; height: 14px;
+      background: #ffd700;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      animation: pingPulse 2s ease-in-out infinite;
+      position: relative;
+    }
+    @keyframes pingPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.6); }
+      50%      { box-shadow: 0 0 0 10px rgba(255,215,0,0); }
+    }
+
+    .pin-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 14px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20,20,40,0.95);
+      border: 1.5px solid #ffd700;
+      border-radius: 12px;
+      padding: 12px 16px;
+      min-width: 200px;
+      max-width: 260px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+      pointer-events: none;
+      z-index: 20;
+      animation: fadeUp 0.25s ease;
+    }
+    .city-pin:hover .pin-tooltip,
+    .city-pin.touch-active .pin-tooltip {
+      display: block;
+    }
+    .pin-tooltip .city-name {
+      font-size: 17px;
+      font-weight: bold;
+      color: #ffd700;
+      margin-bottom: 5px;
+    }
+    .pin-tooltip .city-text {
+      font-size: 14px;
+      color: #f5deb3;
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    /* --- Airplane SVG overlay --- */
+    .airplane-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      pointer-events: none;
+    }
+    .airplane-overlay svg {
+      width: 100%; height: 100%;
+    }
+    .airplane-path {
+      fill: none;
+      stroke: #ffd700;
+      stroke-width: 2;
+      stroke-dasharray: 6 4;
+      stroke-dashoffset: 200;
+      animation: drawPath 4s ease-in-out infinite;
+      opacity: 0.7;
+    }
+    @keyframes drawPath {
+      0%   { stroke-dashoffset: 200; }
+      50%  { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    .airplane-emoji {
+      font-size: 14px;
+      pointer-events: auto;
+      cursor: pointer;
+      filter: drop-shadow(0 0 4px rgba(255,215,0,0.6));
+    }
+
+    /* --- Countdown popup --- */
+    .countdown-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    .countdown-overlay.active { display: flex; }
+
+    .countdown-card {
+      background: rgba(20,20,40,0.96);
+      border: 2px solid #ffd700;
+      border-radius: 18px;
+      padding: 30px 36px;
+      max-width: 420px;
+      width: 90vw;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 40px rgba(255,215,0,0.2);
+      animation: fadeUp 0.4s ease;
+    }
+    .countdown-close {
+      position: absolute;
+      top: 10px; right: 16px;
+      font-size: 24px;
+      color: #999;
+      cursor: pointer;
+      background: none;
+      border: none;
+      line-height: 1;
+    }
+    .countdown-close:hover { color: #fff; }
+
+    .countdown-title {
+      font-size: 22px;
+      color: #ffd700;
+      margin-bottom: 6px;
+    }
+    .countdown-date {
+      font-size: 15px;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+    .countdown-numbers {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .countdown-unit {
+      text-align: center;
+    }
+    .countdown-unit .num {
+      display: block;
+      font-size: clamp(28px, 6vw, 40px);
+      font-weight: bold;
+      color: #ffd700;
+      line-height: 1.1;
+    }
+    .countdown-unit .label {
+      font-size: 11px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .countdown-sub {
+      font-size: 13px;
+      color: #999;
+      font-style: italic;
+    }
+
+    /* --- Flower rain --- */
+    @keyframes floatFromTop {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(70vh) rotate(360deg); opacity: 0; }
+    }
+    @keyframes floatFromBottom {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(-70vh) rotate(-360deg); opacity: 0; }
+    }
+    @keyframes floatFromLeft {
+      0%   { transform: translateX(0) rotate(0deg); opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateX(70vw) rotate(360deg); opacity: 0; }
+    }
+    @keyframes floatFromRight {
+      0%   { transform: translateX(0) rotate(0deg); opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateX(-70vw) rotate(-360deg); opacity: 0; }
+    }
+
+    /* --- Final message --- */
+    .final-message {
+      margin-top: 50px;
+      opacity: 0;
+      animation: fadeUp 1s ease 1s forwards;
+    }
+    .final-message p {
+      font-size: clamp(18px, 4vw, 28px);
+      line-height: 1.8;
+      color: #f5deb3;
+    }
+    .final-message p:first-child {
+      color: #ffd700;
+    }
+
+    /* --- Confetti --- */
+    .confetti-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 200;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px; height: 10px;
+      top: -20px;
+      opacity: 0.9;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+      .memory-grid { gap: 6px; max-width: 340px; }
+      .card-back { font-size: 26px; }
+      nav a { margin: 0 6px; font-size: 14px; }
+      .pin-tooltip { min-width: 160px; max-width: 220px; }
+      .countdown-card { padding: 22px 18px; }
+      .countdown-numbers { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">Startseite</a>
+    <a href="juego.html" style="background:rgba(255,255,255,0.12);">Juego</a>
+  </nav>
+
+  <!-- ======================== -->
+  <!--    PART 1 - MEMORY       -->
+  <!-- ======================== -->
+  <section id="memory-section" class="section active">
+    <h1>Nos recuerdas?</h1>
+    <p class="subtitle">Encuentra todos los pares para descubrir tu regalo</p>
+    <div class="stats">Intentos / Versuche: <span id="move-count">0</span></div>
+    <div class="memory-grid" id="memory-grid"></div>
+  </section>
+
+  <!-- Celebration overlay -->
+  <div class="celebration" id="celebration">
+    <h2>Felicidades!</h2>
+    <p>Lo lograste en <span id="final-moves">0</span> intentos</p>
+    <button class="btn" id="show-schatzkarte">Descubrir el tesoro</button>
+  </div>
+
+  <!-- ============================== -->
+  <!--    PART 2 - SCHATZKARTE         -->
+  <!-- ============================== -->
+  <section id="schatzkarte-section" class="section">
+    <div class="bear-container">
+      <svg class="bear-svg" viewBox="0 0 300 360" xmlns="http://www.w3.org/2000/svg">
+        <!-- Left ear -->
+        <circle cx="85" cy="55" r="42" fill="#8B5E3C"/>
+        <circle cx="85" cy="55" r="28" fill="#C4956A"/>
+        <!-- Right ear -->
+        <circle cx="215" cy="55" r="42" fill="#8B5E3C"/>
+        <circle cx="215" cy="55" r="28" fill="#C4956A"/>
+        <!-- Head -->
+        <circle cx="150" cy="110" r="75" fill="#8B5E3C"/>
+        <!-- Eyes -->
+        <circle cx="122" cy="100" r="9" fill="#2c2c2c"/>
+        <circle cx="178" cy="100" r="9" fill="#2c2c2c"/>
+        <circle cx="125" cy="97" r="3" fill="#fff"/>
+        <circle cx="181" cy="97" r="3" fill="#fff"/>
+        <!-- Nose -->
+        <ellipse cx="150" cy="122" rx="14" ry="10" fill="#5a3825"/>
+        <ellipse cx="150" cy="119" rx="5" ry="3.5" fill="#d4a87c"/>
+        <!-- Mouth -->
+        <path d="M140 130 Q150 142 160 130" stroke="#5a3825" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- Blush -->
+        <ellipse cx="108" cy="120" rx="12" ry="7" fill="rgba(255,150,150,0.35)"/>
+        <ellipse cx="192" cy="120" rx="12" ry="7" fill="rgba(255,150,150,0.35)"/>
+        <!-- Body -->
+        <ellipse cx="150" cy="260" rx="95" ry="100" fill="#8B5E3C"/>
+        <!-- Belly (treasure map area) -->
+        <ellipse cx="150" cy="255" rx="70" ry="75" fill="#F5DEB3"/>
+        <!-- Treasure map details -->
+        <path d="M100 220 Q115 200 130 215 Q145 230 150 210 Q155 190 170 205 Q185 220 195 205" stroke="#8B5E3C" stroke-width="2" stroke-dasharray="5,4" fill="none" stroke-linecap="round"/>
+        <path d="M195 205 Q200 195 190 260" stroke="#8B5E3C" stroke-width="2" stroke-dasharray="5,4" fill="none" stroke-linecap="round"/>
+        <circle cx="100" cy="220" r="5" fill="#8B5E3C" opacity="0.7"/>
+        <text x="100" y="240" text-anchor="middle" font-size="9" fill="#8B5E3C" font-family="Georgia">Start</text>
+        <text x="185" y="275" text-anchor="middle" font-size="28" font-weight="bold" fill="#FFD700" font-family="Georgia" stroke="#c9a000" stroke-width="0.5">X</text>
+        <text x="120" y="260" font-size="12" fill="#FFD700">&#9733;</text>
+        <text x="165" y="235" font-size="10" fill="#FFD700">&#9733;</text>
+        <text x="140" y="280" font-size="8" fill="#FFD700">&#9733;</text>
+        <text x="110" y="290" font-size="10" fill="#FFD700">&#9733;</text>
+        <path d="M115 195 L122 183 L129 195" stroke="#8B5E3C" stroke-width="1.5" fill="none" opacity="0.5"/>
+        <path d="M162 195 L170 181 L178 195" stroke="#8B5E3C" stroke-width="1.5" fill="none" opacity="0.5"/>
+        <line x1="147" y1="298" x2="147" y2="288" stroke="#6b8e5a" stroke-width="1.5"/>
+        <circle cx="147" cy="285" r="5" fill="#6b8e5a" opacity="0.6"/>
+        <!-- Arms -->
+        <ellipse cx="62" cy="240" rx="22" ry="42" fill="#8B5E3C" transform="rotate(-15,62,240)"/>
+        <ellipse cx="238" cy="240" rx="22" ry="42" fill="#8B5E3C" transform="rotate(15,238,240)"/>
+        <!-- Feet -->
+        <ellipse cx="110" cy="345" rx="30" ry="18" fill="#8B5E3C"/>
+        <ellipse cx="190" cy="345" rx="30" ry="18" fill="#8B5E3C"/>
+        <ellipse cx="110" cy="345" rx="18" ry="11" fill="#C4956A"/>
+        <ellipse cx="190" cy="345" rx="18" ry="11" fill="#C4956A"/>
+      </svg>
+    </div>
+
+    <div class="typewriter" id="typewriter"></div>
+
+    <div class="schatzkarte-btn">
+      <button class="btn" id="show-weltkugel">Ver mi regalo</button>
+    </div>
+  </section>
+
+  <!-- ============================== -->
+  <!--    PART 3 - WELTKUGEL           -->
+  <!-- ============================== -->
+  <section id="weltkugel-section" class="section">
+    <h1>Tu eres mi mundo</h1>
+    <p class="subtitle">Cada lugar nos acerco mas</p>
+
+    <div class="globe-wrapper" id="globe">
+      <!-- SVG world map -->
+      <svg class="globe-map" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <!-- North America -->
+        <path d="M80,60 Q100,50 130,55 L145,70 Q155,85 150,110 L140,130 Q130,140 120,135 L100,140 Q85,145 75,130 L60,100 Q55,80 65,65 Z" fill="rgba(80,160,80,0.5)"/>
+        <!-- Central America -->
+        <path d="M100,140 Q108,150 112,165 L108,175 Q104,180 98,178 L94,170 Q90,155 95,145 Z" fill="rgba(80,160,80,0.5)"/>
+        <!-- South America -->
+        <path d="M110,185 Q125,180 135,190 L140,210 Q145,240 140,270 L130,300 Q120,320 110,310 L100,280 Q92,250 95,220 L100,200 Z" fill="rgba(80,160,80,0.5)"/>
+        <!-- Europe -->
+        <path d="M340,55 Q360,48 380,55 L390,70 Q395,85 385,100 L370,110 Q355,115 345,105 L335,85 Q330,70 335,60 Z" fill="rgba(80,160,80,0.5)"/>
+        <!-- Africa -->
+        <path d="M350,120 Q370,115 385,125 L395,150 Q400,180 395,220 L385,260 Q370,280 355,270 L340,240 Q330,200 335,160 L340,135 Z" fill="rgba(80,160,80,0.5)"/>
+        <!-- Asia -->
+        <path d="M400,45 Q440,35 490,40 L530,55 Q560,70 570,100 L565,130 Q555,150 530,145 L490,135 Q450,125 420,110 L400,90 Q390,70 395,55 Z" fill="rgba(80,160,80,0.5)"/>
+        <!-- Australia -->
+        <path d="M550,230 Q575,220 595,230 L605,250 Q610,270 600,285 L580,290 Q560,285 555,265 L550,245 Z" fill="rgba(80,160,80,0.5)"/>
+        <!-- Duplicates for seamless scroll -->
+        <path d="M480,60 Q500,50 530,55 L545,70 Q555,85 550,110 L540,130 Q530,140 520,135 L500,140 Q485,145 475,130 L460,100 Q455,80 465,65 Z" fill="rgba(80,160,80,0.5)"/>
+        <path d="M500,140 Q508,150 512,165 L508,175 Q504,180 498,178 L494,170 Q490,155 495,145 Z" fill="rgba(80,160,80,0.5)"/>
+        <path d="M510,185 Q525,180 535,190 L540,210 Q545,240 540,270 L530,300 Q520,320 510,310 L500,280 Q492,250 495,220 L500,200 Z" fill="rgba(80,160,80,0.5)"/>
+        <path d="M740,55 Q760,48 780,55 L790,70 Q795,85 785,100 L770,110 Q755,115 745,105 L735,85 Q730,70 735,60 Z" fill="rgba(80,160,80,0.5)"/>
+        <path d="M750,120 Q770,115 785,125 L795,150 Q800,180 795,220 L785,260 Q770,280 755,270 L740,240 Q730,200 735,160 L740,135 Z" fill="rgba(80,160,80,0.5)"/>
+      </svg>
+
+      <div class="globe-shine"></div>
+
+      <!-- City pins -->
+      <!-- Lima -->
+      <div class="city-pin" style="left:17%; top:56%;" ontouchstart="toggleTouch(this)" onmouseenter="lanzarFloresDebounced()">
+        <div class="pin-dot"></div>
+        <div class="pin-tooltip">
+          <div class="city-name">Lima</div>
+          <div class="city-text">Aqui estudia la jueza mas exitosa y mejor del mundo</div>
+        </div>
+      </div>
+      <!-- Huacho -->
+      <div class="city-pin" style="left:16%; top:53%;" ontouchstart="toggleTouch(this)" onmouseenter="lanzarFloresDebounced()">
+        <div class="pin-dot"></div>
+        <div class="pin-tooltip">
+          <div class="city-name">Huacho</div>
+          <div class="city-text">Aqui nacio la princesa Osita y aprendio a querer</div>
+        </div>
+      </div>
+      <!-- Malta -->
+      <div class="city-pin" style="left:52%; top:38%;" ontouchstart="toggleTouch(this)" onmouseenter="lanzarFloresDebounced()">
+        <div class="pin-dot"></div>
+        <div class="pin-tooltip">
+          <div class="city-name">Malta</div>
+          <div class="city-text">Magico, verdad?</div>
+        </div>
+      </div>
+      <!-- Valencia -->
+      <div class="city-pin" style="left:46%; top:36%;" ontouchstart="toggleTouch(this)" onmouseenter="lanzarFloresDebounced()">
+        <div class="pin-dot"></div>
+        <div class="pin-tooltip">
+          <div class="city-name">Valencia</div>
+          <div class="city-text">Aqui crecio el amor</div>
+        </div>
+      </div>
+      <!-- Dusseldorf -->
+      <div class="city-pin" id="pin-dusseldorf" style="left:50%; top:28%;" ontouchstart="toggleTouch(this)" onmouseenter="lanzarFloresDebounced()">
+        <div class="pin-dot"></div>
+        <div class="pin-tooltip">
+          <div class="city-name">Dusseldorf</div>
+          <div class="city-text">Aqui vive tu caballero</div>
+        </div>
+      </div>
+      <!-- Leverkusen -->
+      <div class="city-pin" style="left:51%; top:29%;" ontouchstart="toggleTouch(this)" onmouseenter="lanzarFloresDebounced()">
+        <div class="pin-dot"></div>
+        <div class="pin-tooltip">
+          <div class="city-name">Leverkusen</div>
+          <div class="city-text">Aqui te dio la primera rosa. Te amo.</div>
+        </div>
+      </div>
+
+      <!-- Airplane SVG overlay -->
+      <div class="airplane-overlay" id="airplane-overlay">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <!-- Flight path: Dusseldorf (50,28) to mid-Atlantic, curving toward Lima (17,56) -->
+          <path id="flight-path" class="airplane-path"
+            d="M 50,28 C 42,32 30,38 22,45"
+          />
+          <!-- Airplane following the path -->
+          <text class="airplane-emoji" font-size="4">
+            <animateMotion dur="4s" repeatCount="indefinite" rotate="auto">
+              <mpath href="#flight-path"/>
+            </animateMotion>
+            &#9992;
+          </text>
+          <!-- Invisible click area following the same path -->
+          <circle r="5" fill="transparent" style="pointer-events:auto; cursor:pointer;"
+                  onclick="openCountdown()" ontouchstart="openCountdown()">
+            <animateMotion dur="4s" repeatCount="indefinite">
+              <mpath href="#flight-path"/>
+            </animateMotion>
+          </circle>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Static airplane button below globe for easy access on mobile -->
+    <div style="margin-bottom:30px;">
+      <button class="btn" onclick="openCountdown()" style="font-size:16px; padding:10px 24px; background:linear-gradient(135deg,#2c2c54,#3d3d6b); color:#ffd700; border:1.5px solid #ffd700;">
+        Lima &middot; 4. August 2026
+      </button>
+    </div>
+
+    <div class="final-message">
+      <p>Ich liebe dich mehr als alle Sterne</p>
+      <p>Te amo mas que todo esto</p>
+    </div>
+  </section>
+
+  <!-- Countdown popup -->
+  <div class="countdown-overlay" id="countdown-overlay" onclick="closeCountdown(event)">
+    <div class="countdown-card" onclick="event.stopPropagation()">
+      <button class="countdown-close" onclick="closeCountdown(event)">&times;</button>
+      <div class="countdown-title">Lima</div>
+      <div class="countdown-date">4. August 2026</div>
+      <div class="countdown-numbers" id="countdown-numbers">
+        <div class="countdown-unit"><span class="num" id="cd-days">---</span><span class="label">Dias / Tage</span></div>
+        <div class="countdown-unit"><span class="num" id="cd-hours">--</span><span class="label">Horas / Std</span></div>
+        <div class="countdown-unit"><span class="num" id="cd-mins">--</span><span class="label">Min</span></div>
+        <div class="countdown-unit"><span class="num" id="cd-secs">--</span><span class="label">Seg / Sek</span></div>
+      </div>
+      <div class="countdown-sub">Faltan... / Noch...</div>
+    </div>
+  </div>
+
+  <!-- Confetti container -->
+  <div class="confetti-container" id="confetti-container"></div>
+
+  <script>
+    // ==========================================
+    //  MEMORY GAME
+    // ==========================================
+    var BASE_URL = 'https://juan-carlos-ligera.github.io/Osita/';
+    var images = [
+      'wir-mund.jpeg', 'wir-maps.jpeg', 'wir-kind.jpeg', 'spass-wir.jpeg',
+      'abogada.jpeg', 'WA.jpeg', 'addicto.jpeg', 'lernen.jpeg'
+    ];
+    var flippedCards = [];
+    var matchedPairs = 0;
+    var moves = 0;
+    var lockBoard = false;
+
+    function shuffle(arr) {
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+      }
+      return arr;
+    }
+
+    function createBoard() {
+      var grid = document.getElementById('memory-grid');
+      var pairs = [];
+      images.forEach(function(img, idx) {
+        pairs.push({ id: idx, image: img });
+        pairs.push({ id: idx, image: img });
+      });
+      shuffle(pairs);
+
+      pairs.forEach(function(card, index) {
+        var el = document.createElement('div');
+        el.classList.add('card');
+        el.dataset.index = index;
+        el.dataset.id = card.id;
+        el.innerHTML =
+          '<div class="card-face card-back">&#129528;</div>' +
+          '<div class="card-face card-front">' +
+            '<img src="' + BASE_URL + card.image + '" alt="foto" loading="lazy">' +
+          '</div>';
+        el.addEventListener('click', function() { flipCard(el); });
+        grid.appendChild(el);
+      });
+    }
+
+    function flipCard(el) {
+      if (lockBoard) return;
+      if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
+      if (flippedCards.length >= 2) return;
+
+      el.classList.add('flipped');
+      flippedCards.push(el);
+
+      if (flippedCards.length === 2) {
+        moves++;
+        document.getElementById('move-count').textContent = moves;
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      var a = flippedCards[0], b = flippedCards[1];
+      if (a.dataset.id === b.dataset.id) {
+        a.classList.add('matched');
+        b.classList.add('matched');
+        flippedCards = [];
+        matchedPairs++;
+        if (matchedPairs === images.length) {
+          setTimeout(onGameComplete, 600);
+        }
+      } else {
+        lockBoard = true;
+        setTimeout(function() {
+          a.classList.remove('flipped');
+          b.classList.remove('flipped');
+          flippedCards = [];
+          lockBoard = false;
+        }, 1000);
+      }
+    }
+
+    function onGameComplete() {
+      document.getElementById('final-moves').textContent = moves;
+      document.getElementById('celebration').classList.add('active');
+      launchConfetti();
+    }
+
+    // ==========================================
+    //  CONFETTI
+    // ==========================================
+    function launchConfetti() {
+      var container = document.getElementById('confetti-container');
+      var colors = ['#ffd700', '#ff4060', '#40c4ff', '#ff9100', '#76ff03', '#e040fb'];
+      for (var i = 0; i < 80; i++) {
+        var piece = document.createElement('div');
+        piece.classList.add('confetti-piece');
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.width = (Math.random() * 8 + 6) + 'px';
+        piece.style.height = (Math.random() * 8 + 6) + 'px';
+        piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        piece.style.animationDelay = (Math.random() * 1.5) + 's';
+        container.appendChild(piece);
+      }
+      setTimeout(function() { container.innerHTML = ''; }, 5000);
+    }
+
+    // ==========================================
+    //  SECTION TRANSITIONS
+    // ==========================================
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+      document.getElementById(id).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('show-schatzkarte').addEventListener('click', function() {
+      document.getElementById('celebration').classList.remove('active');
+      showSection('schatzkarte-section');
+      startTypewriter();
+    });
+
+    document.getElementById('show-weltkugel').addEventListener('click', function() {
+      showSection('weltkugel-section');
+      startCountdownTimer();
+    });
+
+    // ==========================================
+    //  TYPEWRITER
+    // ==========================================
+    function startTypewriter() {
+      var text = 'Tu regalo esta esperando... Dein Geschenk wartet...';
+      var el = document.getElementById('typewriter');
+      el.innerHTML = '';
+      var i = 0;
+      function type() {
+        if (i < text.length) {
+          el.innerHTML = text.substring(0, i + 1) + '<span class="cursor">|</span>';
+          i++;
+          setTimeout(type, 60);
+        } else {
+          el.innerHTML = text;
+        }
+      }
+      type();
+    }
+
+    // ==========================================
+    //  TOUCH SUPPORT FOR TOOLTIPS
+    // ==========================================
+    // Debounced flower launcher (500ms cooldown)
+    var floresTimeout = null;
+    function lanzarFloresDebounced() {
+      if (floresTimeout) return;
+      lanzarFlores();
+      floresTimeout = setTimeout(function() { floresTimeout = null; }, 500);
+    }
+
+    var lastTouched = null;
+    function toggleTouch(pin) {
+      if (lastTouched && lastTouched !== pin) {
+        lastTouched.classList.remove('touch-active');
+      }
+      pin.classList.toggle('touch-active');
+      lastTouched = pin;
+      lanzarFloresDebounced();
+    }
+    // Close tooltip when tapping elsewhere
+    document.addEventListener('touchstart', function(e) {
+      if (lastTouched && !lastTouched.contains(e.target)) {
+        lastTouched.classList.remove('touch-active');
+        lastTouched = null;
+      }
+    });
+
+    // ==========================================
+    //  COUNTDOWN
+    // ==========================================
+    var TARGET_DATE = new Date('2026-08-04T00:00:00');
+    var countdownInterval = null;
+
+    function startCountdownTimer() {
+      if (countdownInterval) return;
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    function updateCountdown() {
+      var diff = TARGET_DATE - new Date();
+      if (diff < 0) diff = 0;
+      var dias = Math.floor(diff / 86400000);
+      var horas = Math.floor((diff % 86400000) / 3600000);
+      var minutos = Math.floor((diff % 3600000) / 60000);
+      var segundos = Math.floor((diff % 60000) / 1000);
+      document.getElementById('cd-days').textContent = dias;
+      document.getElementById('cd-hours').textContent = horas < 10 ? '0' + horas : horas;
+      document.getElementById('cd-mins').textContent = minutos < 10 ? '0' + minutos : minutos;
+      document.getElementById('cd-secs').textContent = segundos < 10 ? '0' + segundos : segundos;
+    }
+
+    function openCountdown() {
+      startCountdownTimer();
+      document.getElementById('countdown-overlay').classList.add('active');
+      lanzarFloresDebounced();
+    }
+
+    function closeCountdown(e) {
+      e.stopPropagation();
+      document.getElementById('countdown-overlay').classList.remove('active');
+    }
+
+    // ==========================================
+    //  FLOWER RAIN (17 FLOWERS)
+    // ==========================================
+    function lanzarFlores() {
+      var flores = ['\uD83C\uDF38', '\uD83C\uDF3A', '\uD83C\uDF3C', '\uD83C\uDF3B', '\uD83C\uDF39'];
+      var animations = ['floatFromTop', 'floatFromBottom', 'floatFromLeft', 'floatFromRight'];
+
+      for (var i = 0; i < 17; i++) {
+        var flor = document.createElement('div');
+        flor.textContent = flores[Math.floor(Math.random() * flores.length)];
+        var borde = Math.floor(Math.random() * 4);
+        var anim = animations[borde];
+        var pos = Math.random() * 100;
+
+        var styles = 'position:fixed;font-size:2rem;pointer-events:none;z-index:9999;';
+        styles += 'animation:' + anim + ' 3.5s ease-out forwards;';
+        styles += 'animation-delay:' + (i * 0.12) + 's;';
+        styles += 'opacity:0;animation-fill-mode:forwards;';
+
+        if (borde === 0) { // top
+          styles += 'top:-2rem;left:' + pos + 'vw;';
+        } else if (borde === 1) { // bottom
+          styles += 'bottom:-2rem;left:' + pos + 'vw;';
+        } else if (borde === 2) { // left
+          styles += 'left:-2rem;top:' + pos + 'vh;';
+        } else { // right
+          styles += 'right:-2rem;top:' + pos + 'vh;';
+        }
+
+        flor.style.cssText = styles;
+        document.body.appendChild(flor);
+
+        (function(el) {
+          setTimeout(function() { if (el.parentNode) el.remove(); }, 5000);
+        })(flor);
+      }
+    }
+
+    // ==========================================
+    //  INIT
+    // ==========================================
+    createBoard();
+  </script>
+</body>
+</html>
